@@ -10,6 +10,11 @@ import PySimpleGUI as sg
 import requests
 import wget
 import platform
+from GrabzIt import GrabzItClient
+from PIL import Image
+
+
+
 sg.theme('DarkTanBlue')
 currentfile = 0
 options = {
@@ -23,18 +28,44 @@ def main():
         sg.Popup('No data Folder found. Please extract all Files form your downloaded Archive!', keep_on_top=True,title="Error")
         window.close()
     layout = [
-        [sg.Image("./notice.png",background_color="#FFF")],
+        [sg.Image("./notice.png",key="-image-",background_color="#FFF")],
         [sg.Output(size=(145, 20), background_color='black', text_color='white')],
         [sg.ProgressBar(max_value=100, orientation='h', size=(60, 20), key='progress'), sg.Text(text="", key="totalfiles", size=(3, 1)), sg.Text(text="", key="count", size=(8, 1))],
-        [sg.Button("Launch"), sg.Button('Update'), sg.Button('Exit'), sg.Text(text="", key="status", size=(16, 1))]]
+        [sg.Button("Launch"), sg.Button('Update'),sg.Button('Update News'), sg.Button('Exit'), sg.Text(text="", key="status", size=(16, 1))]]
     window = sg.Window('PokeOne Updater - written in Python3',layout, finalize=True)
     updating = False
-    
+    try:
+        window["-image-"].update("./notice_online.jpg")
+    except:
+        window["-image-"].update("./notice.png")
     while True:
         event, values = window.read()
         if event in (sg.WIN_CLOSED, 'Exit'):
             break
-        
+        elif event == "Update News":
+            try:
+                os.remove("./notice_online.jpg")
+            except:
+                pass
+            try:
+                
+                grabzIt = GrabzItClient.GrabzItClient("YTNlN2ViZTJiYjkxNGU0Mjg1ZGE5ZDBjZTgwZDMwNGY=", "SUM/Pz8/DT9HPxY/Pz9+Pz9gPz8oPxhFAhY/OT8/Pz8=")
+                grabzIt.URLToImage("http://update.poke.one/notice")
+                filepath = "./notice_online.jpg"
+                grabzIt.SaveTo(filepath)
+                im = Image.open('./notice_online.jpg')
+                left = 0
+                top = 0
+                right = 1024
+                bottom = 300
+                im1 = im.crop((left, top, right, bottom)) 
+                im1.save('./notice_online.png')
+                os.remove("./notice_online.jpg")
+                window["-image-"].update("./notice_online.png")
+                
+            except:
+                sg.Popup('Something went wrong...', keep_on_top=True,title="Error")
+            
         elif event == 'Launch' and updating == False:
             #if platform.system() == "Windows":
             #   os.system("start ./PokeOne.exe")
@@ -80,6 +111,7 @@ def runUpdate(timeout=None, window=None):
 
 
 def parseUpdate(window=None):
+    
     filesurl = 'http://update.poke.one/files'
     urllib.request.urlretrieve(filesurl, 'files')
     f = open('files')
