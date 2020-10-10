@@ -3,112 +3,163 @@ import subprocess
 import sys
 import urllib.request
 import zipfile
+import threading
 from zipfile import ZipFile
-from time import sleep
+import time
 import pathlib
 import PySimpleGUI as sg
 import requests
+from tqdm.auto import tqdm
 import wget
 import platform
-from GrabzIt import GrabzItClient
-from PIL import Image
+import filecmp
 
+from PIL import Image
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+
+sys.stdout = open(os.devnull, "w")
+sys.stderr = open(os.devnull, "w")
+tqdm.monitor_interval = 0
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(__file__)
+    return os.path.join(base_path, relative_path)
+
+print(resource_path(os.getcwd()))
 
 
 sg.theme('DarkTanBlue')
 currentfile = 0
 options = {
     'format': 'png',
-    'crop-h': '300',
+    'crop-h': '500',
     'encoding': "UTF-8",
 }
 
+filearray = []
+thread_finished = threading.Event()
+result_available = threading.Event()
+
+def download_thread(arg1, window):
+    for item in arg1:
+        print(item)
+        download(item,window) 
+        #window['p_t'].update_bar(0)  
+        pass
+    thread_finished.set()
+    
+def update_thread(window):
+    window["Launch"].Update(disabled=True)
+    window["Update"].Update(disabled=True)
+    window["Exit"].Update(disabled=True)
+    runUpdate(window=window)
+
+    result_available.wait()
+    extractFile(window)
+    window["status"].update("Finished!")
+    window['progress'].update_bar(100)
+    updating = False
+    window["Launch"].Update(disabled=False)
+    window["Update"].Update(disabled=False)
+    window["Exit"].Update(disabled=False)
+def firefox_thread(opens,window):
+    if opens == True:
+        window["Exit"].Update(disabled=True)
+        if platform.system() == "Linux":
+            options = Options()
+            options.binary_location = resource_path(os.getcwd()) + "/utils/firefox/firefox"
+            options.add_argument("--headless") 
+            driver = webdriver.Firefox(executable_path=(resource_path(os.getcwd()) + '/utils/firefox/geckodriver'),options=options)
+            driver.get('http://update.poke.one/notice')
+            driver.save_screenshot("./notice_online.png")
+            driver.close()
+            driver.quit()
+        else:
+            options = Options()
+            options.binary_location = resource_path(os.getcwd()) + "/utils/firefox_win/firefox.exe"
+            options.add_argument("--headless") 
+            driver = webdriver.Firefox(executable_path=(resource_path(os.getcwd()) + '/utils/firefox_win/geckodriver.exe'),options=options)
+            driver.get('http://update.poke.one/notice')
+            driver.save_screenshot("./notice_online.png")
+            driver.close()
+            driver.quit()
+        im = Image.open('./notice_online.png')
+        left = 0
+        top = 0
+        right = 1024
+        bottom = 500
+        im1 = im.crop((left, top, right, bottom)) 
+        im1.save('./notice_online.png')
+        window["-image-"].update("./notice_online.png")
+        window["Exit"].Update(disabled=False)
 def main():
+
     if os.path.exists("./PokeOne_Data/") == False:
         sg.Popup('No data Folder found. Please extract all Files form your downloaded Archive!', keep_on_top=True,title="Error")
         window.close()
     layout = [
-        [sg.Image("./notice.png",key="-image-",background_color="#FFF")],
-        [sg.Output(size=(145, 20), background_color='black', text_color='white')],
-        [sg.ProgressBar(max_value=100, orientation='h', size=(60, 20), key='progress'), sg.Text(text="", key="totalfiles", size=(3, 1)), sg.Text(text="", key="count", size=(8, 1))],
-        [sg.Button("Launch"), sg.Button('Update'),sg.Button('Update News'), sg.Button('Exit'), sg.Text(text="", key="status", size=(16, 1))]]
-    window = sg.Window('PokeOne Updater - written in Python3',layout, finalize=True)
+        [sg.Image("./notice.png",key="-image-",background_color="#000")],
+
+    [sg.ProgressBar(max_value=100, orientation='h', size=(70, 20), key='p_t'), sg.Text(text="", key="perc", size=(8, 1))],
+        [sg.ProgressBar(max_value=100, orientation='h', size=(70, 20), key='progress'), sg.Text(text="", key="totalfiles", size=(3, 1)), sg.Text(text="", key="count", size=(8, 1))],
+        [sg.Button("Launch",size=(20,1)), sg.Button('Update',size=(20,1)), sg.Button('Exit',size=(20,1)), sg.Text(text="", key="status", size=(16, 1))]]
+    window = sg.Window('PokeOne Updater - written in Python3',layout,resizable=False, finalize=True,disable_close=True)
     updating = False
-    try:
-        window["-image-"].update("./notice_online.jpg")
-    except:
-        window["-image-"].update("./notice.png")
+    
+    ft = threading.Thread(target=firefox_thread, args=(True,window,), daemon=True)
+    ft.start()
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=40)
         if event in (sg.WIN_CLOSED, 'Exit'):
+            ft = threading.Thread(target=firefox_thread, args=(False,window,), daemon=True)
+            ft.start()
             break
-        elif event == "Update News":
-            try:
-                os.remove("./notice_online.jpg")
-            except:
-                pass
-            try:
-                
-                grabzIt = GrabzItClient.GrabzItClient("YTNlN2ViZTJiYjkxNGU0Mjg1ZGE5ZDBjZTgwZDMwNGY=", "SUM/Pz8/DT9HPxY/Pz9+Pz9gPz8oPxhFAhY/OT8/Pz8=")
-                grabzIt.URLToImage("http://update.poke.one/notice")
-                filepath = "./notice_online.jpg"
-                grabzIt.SaveTo(filepath)
-                im = Image.open('./notice_online.jpg')
-                left = 0
-                top = 0
-                right = 1024
-                bottom = 300
-                im1 = im.crop((left, top, right, bottom)) 
-                im1.save('./notice_online.png')
-                os.remove("./notice_online.jpg")
-                window["-image-"].update("./notice_online.png")
-                
-            except:
-                sg.Popup('Something went wrong...', keep_on_top=True,title="Error")
-            
         elif event == 'Launch' and updating == False:
-            #if platform.system() == "Windows":
-            #   os.system("start ./PokeOne.exe")
+            if platform.system() == "Windows":
+               os.system("start ./PokeOne.exe")
             if platform.system() == "Linux":
                 #print("Linux needs wine-staging & dxvk")
                 try:
                     os.system("wine ./PokeOne.exe")
                 except:
                     sg.Popup('Something went wrong...', keep_on_top=True,title="Error")
-            if os.path.exists("./PokeOne.exe") == False:
+            elif os.path.exists("./PokeOne.exe") == False:
                 sg.Popup('Can´t find Game executable... Is it correctly installed / updated?', keep_on_top=True,title="Error")
             else:
                 print(platform.system + " is not Supported")
         elif event == 'Update':
             updating = True
-            runUpdate(window=window)
-            window["status"].update("Finished!")
-            window['progress'].update_bar(100)
+            t2 = threading.Thread(target=update_thread, args=(window,), daemon=True)
+            t2.start()
             updating = False
     window.close()
 
 
-def runUpdate(timeout=None, window=None):
+def runUpdate(timeout=40, window=None):
 
     parseUpdate(window)
-    try:
-        nop = None
-        cmd = ""
-        p = subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = ''
-        for line in p.stdout:
-            line = line.decode(errors='replace' if (sys.version_info) < (
-                3, 5) else 'backslashreplace').rstrip()
-            output += line
+    nop = None
+    cmd = ""
+    p = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = ''
+    for line in p.stdout:
+        line = line.decode(errors='replace' if (sys.version_info) < (
+            3, 5) else 'backslashreplace').rstrip()
+        output += line
 
-            window.refresh() if window else nop
+        window.refresh() if window else nop
 
-        retval = p.wait(timeout)
-        return (retval, output)
-    except:
-        pass
-
+    retval = p.wait(timeout)
+    result_available.set()
+    return (retval, output)
+    
 
 def parseUpdate(window=None):
     
@@ -119,15 +170,11 @@ def parseUpdate(window=None):
     while line:
         linePart = line.partition('>')[0].replace('\\', '/')
         window["status"].update("Downloading...")
-        download(linePart, window)
+        filearray.append(linePart)
         line = f.readline()
-    window["status"].update("Extracting...")
-    try:
-        extractFile(window)
-        f.close()
-    except:
-        pass
-
+    t = threading.Thread(target=download_thread, args=(filearray, window,), daemon=True)
+    t.start()
+    thread_finished.wait()
 
 def download(file, window=None):
     downloadString = ("http://update.poke.one/request/" +
@@ -135,26 +182,35 @@ def download(file, window=None):
     req = urllib.request.Request(downloadString, method='HEAD')
     r = urllib.request.urlopen(req)
     outputfile = downloadString.replace("http://update.poke.one/request/", "")
-    print(outputfile)
+    
     outputfile = outputfile + ".zip"
-
+    print(outputfile)
     num_lines = sum(1 for line in open('files'))
     global currentfile
     count = 0
+    
     with open('files', 'r') as f:
         for line in f:
             count += 1
     currentfile += 1
     window["count"].update(str(currentfile) + " / " + str(count))
-    window.refresh()
-    f = requests.get(downloadString)
-    try:
-        f2 = open(outputfile, "wb").write(f.content)
-
-    except:
-        pass
-
+    window.refresh()  
+    response = requests.get(downloadString, stream=True)
+    total_size_in_bytes= int(response.headers.get('content-length', 0))
+    block_size = 32*1024 #1 Kibibyte
+    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+    with open(outputfile, 'wb') as file:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            window['p_t'].update_bar(round(progress_bar.n/total_size_in_bytes*100))
+            window['perc'].update(round(progress_bar.n/total_size_in_bytes*100))
+            window.refresh()
+            file.write(data)
+            
+            window.refresh()
+    #f2 = open(outputfile, "wb").write(response.content)
     window['progress'].update_bar(currentfile / count * 100)
+
     window.refresh()
 
 
@@ -167,6 +223,7 @@ def extractFile(window=None):
         for line in f:
             count += 1
     window['progress'].update_bar(0)
+    window.refresh()
     for root, dirs, files in os.walk(rootpath):
         for name in files:
             if name.endswith((".zip", ".ZIP")):
@@ -184,6 +241,7 @@ def extractFile(window=None):
                 window.refresh()
                 currentfile += 1
                 window['progress'].update_bar(currentfile / count * 100)
+                window.refresh()
     os.chdir(rootpath)
 
 
@@ -192,3 +250,4 @@ def extractFile(window=None):
     #		if name.endswith((".zip", ".ZIP")):
     #			os.remove(name)
 main()
+
