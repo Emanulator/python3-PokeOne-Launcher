@@ -1,8 +1,3 @@
-<Application xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
-  <VisualElements
-      ShowNameOnSquare150x150Logo='on'
-      Square150x150Logo='browser\VisualElements\VisualElements_150.png'
-      Square70x70Logo='browser\VisualElements\VisualElements_70.png'
-      ForegroundText='light'
-      BackgroundColor='#000f40'/>
-</Application>
+version https://git-lfs.github.com/spec/v1
+oid sha256:824be2945fea49c544fa788ff125ff532176e9712959187638e6ec1c6f9c5aea
+size 352

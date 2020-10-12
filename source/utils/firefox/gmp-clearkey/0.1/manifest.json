@@ -1,9 +1,3 @@
-{
-    "name": "clearkey",
-    "description": "ClearKey Gecko Media Plugin",
-    "version": "1",
-    "x-cdm-module-versions": "4",
-    "x-cdm-interface-versions": "10",
-    "x-cdm-host-versions": "10",
-    "x-cdm-codecs": ""
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:b7d65e60cccb80ffb2e95b5ae7e355d2c8c37575e886eef4325ca04fa7ba68fc
+size 225

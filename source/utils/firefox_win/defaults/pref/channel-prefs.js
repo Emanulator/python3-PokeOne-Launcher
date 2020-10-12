@@ -1,5 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-pref("app.update.channel", "esr");
+version https://git-lfs.github.com/spec/v1
+oid sha256:652c425f1897a39fc7f456e205edb60c2a83a4b4d1d0ac4dae38529b5b0a3eff
+size 246
