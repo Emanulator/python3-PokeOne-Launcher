@@ -4,4 +4,4 @@ For the Players who don´t use Windows.
 
 Installs the required Python packages automatically.
 
-![ScreenShot](/images/main.PNG)
+![ScreenShot](/images/main.png)
