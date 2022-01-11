@@ -13,7 +13,7 @@ It installs the required Python packages automatically.
 # Questions that may be asked:
 
 ## Is this allowed by the Devs of the Game?
-Good question! I never asked them. If they say, that i should remove this, i will do it.
+Good question! I never asked them. If they want this removed, i will remove it.
 
 ## Why does it not work?
 I dont know? I have only tested this on a few Machines.
