@@ -48,8 +48,8 @@ processing = False
 only_update = False
 new_install = True
 updatefiles = 0
-#sys.stdout = open(os.devnull, "w")
-#sys.stderr = open(os.devnull, "w")
+sys.stdout = open(os.devnull, "w")
+sys.stderr = open(os.devnull, "w")
 
 
 class downloadNewThread(QThread):
