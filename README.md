@@ -2,9 +2,9 @@
 
 For the Players who don´t use Windows. (Windows is supported by this Launcher, but you should use the official one instead)
 
-Requires wine (or wine-staging) and DXVK installed on your linux machine for the actual game to run.
+**Requires wine (or wine-staging) and DXVK installed on your linux machine for the actual game to run.**
 
-It installs the required Python packages automatically.
+It installs the required Python packages automatically. **(needs python-pip installed)**
 
 ![ScreenShot](/images/main.png)
 
