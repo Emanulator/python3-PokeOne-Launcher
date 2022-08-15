@@ -311,7 +311,7 @@ class Launcher(QWidget):
 
     def launchGame(self):
         try:
-            subprocess.Popen("start gamedata/PokeOne.exe")
+            subprocess.Popen("gamedata/PokeOne.exe")
         except Exception as e:
             print(e)
         try:
