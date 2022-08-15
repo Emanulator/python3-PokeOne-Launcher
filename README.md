@@ -8,7 +8,7 @@ It installs the required Python packages automatically. **(needs python-pip inst
 
 ![ScreenShot](/images/screenshot_linux.png)
 
-
+![ScreenShot](/images/main.png)
 
 # Questions that may be asked:
 
