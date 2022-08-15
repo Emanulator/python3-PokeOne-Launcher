@@ -22,4 +22,4 @@ I dont know? I have only tested this on a few Machines.
 No.
 
 ## How do i run this on linux?
-If you don´t know how to run a python script, maybe you shouldn´t use linux.
+Read the Requirements above, then from a terminal: "chmod +x launch.sh" (without quotation marks) and then run launch.sh
