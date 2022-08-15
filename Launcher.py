@@ -51,8 +51,8 @@ processing = False
 only_update = False
 new_install = True
 updatefiles = 0
-#sys.stdout = open(os.devnull, "w")
-#sys.stderr = open(os.devnull, "w")
+sys.stdout = open(os.devnull, "w")
+sys.stderr = open(os.devnull, "w")
 gamemode = False
 
 class downloadNewThread(QThread):
@@ -326,7 +326,7 @@ class Launcher(QWidget):
     def changelogEvent(self):
         msg = QMessageBox()
         msg.setWindowTitle("Launcher Changelog")
-        msg.setText("v2.2.3-S: Removed Reload Button.")
+        msg.setText("")
         msg.exec()
 
     def reloadEvent(self):
