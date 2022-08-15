@@ -18,17 +18,19 @@ import pkg_resources
 
 
 import_list = {"requests","wget","PyQt5","tqdm"}
-
-for module in import_list:
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", module])
-    except:
-        pass
-
+if os.path.exists("sys/pyinstalled") == False:
+    for module in import_list:
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", module])
+            with open("sys/pyinstalled", mode='a'): pass
+        except:
+            pass
+else:
+    pass
 
 import requests
 import wget
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtWidgets import (
@@ -39,6 +41,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QProgressBar,
     QMessageBox,
+    QCheckBox,
 )
 from tqdm.auto import tqdm
 import shlex
@@ -50,7 +53,7 @@ new_install = True
 updatefiles = 0
 sys.stdout = open(os.devnull, "w")
 sys.stderr = open(os.devnull, "w")
-
+gamemode = False
 
 class downloadNewThread(QThread):
     data_downloaded = Signal(object)
@@ -308,11 +311,14 @@ class Launcher(QWidget):
 
     def launchGame(self):
         try:
-            os.system("start gamedata/PokeOne.exe")
+            subprocess.Popen("start gamedata/PokeOne.exe")
         except Exception as e:
             print(e)
         try:
-            os.system("wine gamedata/PokeOne.exe")
+            if gamemode == True:
+                subprocess.Popen("DXVK_ASYNC=1 gamemoderun wine gamedata/PokeOne.exe", shell=True)
+            else:
+                subprocess.Popen("wine gamedata/PokeOne.exe", shell=True)
 
         except Exception as e:
             print(e)
@@ -328,7 +334,14 @@ class Launcher(QWidget):
         cmds = shlex.split(cmd)
         p = subprocess.Popen(cmds, start_new_session=True)
         sys.exit()
+    def clickChBox(self, state):
 
+        if state == QtCore.Qt.Checked:
+            print('Checked')
+            gamemode = True
+        else:
+            print('Unchecked')
+            gamemode = False
     def setup(self):
 
         vbox = QVBoxLayout(self)
@@ -383,13 +396,18 @@ class Launcher(QWidget):
         # vbox.addItem(self.Spacer)
         # vbox.addItem(self.Spacer)
         # vbox.addItem(self.Spacer)
+        self.chbox = QCheckBox("With Gamemode (on Linux)",self)
+        self.chbox.resize(160,30)
+        self.chbox.stateChanged.connect(self.clickChBox)
+        
         vbox.addWidget(self.label_curr)
         vbox.addWidget(self.progressfile)
         vbox.addWidget(self.label_progress)
         vbox.addWidget(self.progressall)
         vbox.addWidget(self.btn_go)
         vbox.addWidget(self.btn_launch)
-
+        vbox.addWidget(self.chbox)
+        
         self.setLayout(vbox)
         self.setGeometry(100, 100, 200, 150)
         self.setFixedSize(700, 220)
