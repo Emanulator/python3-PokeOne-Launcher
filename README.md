@@ -6,7 +6,7 @@ For the Players who don´t use Windows. (Windows is supported by this Launcher, 
 
 It installs the required Python packages automatically. **(needs python-pip installed)**
 
-![ScreenShot](/images/main.png)
+![ScreenShot](/images/screenshot_linux.png)
 
 
 
