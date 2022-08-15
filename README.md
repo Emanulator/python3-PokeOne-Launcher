@@ -22,4 +22,4 @@ I dont know? I have only tested this on a few Machines.
 No.
 
 ## How do i run this on linux?
-Read the Requirements above, then from a terminal: "chmod +x launch.sh" (without quotation marks) and then run launch.sh
+Read the Requirements above, downlaod this repo, extract it to a new folder, then from a terminal: "chmod +x launch.sh" (without quotation marks) and then run launch.sh
