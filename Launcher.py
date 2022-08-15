@@ -412,8 +412,9 @@ class Launcher(QWidget):
         vbox.addWidget(self.progressall)
         vbox.addWidget(self.btn_go)
         vbox.addWidget(self.btn_launch)
+        if os.name == 'nt':
+            self.chbox.hide()
         vbox.addWidget(self.chbox)
-        
         self.setLayout(vbox)
         self.setGeometry(100, 100, 200, 150)
         self.setFixedSize(700, 220)
