@@ -19,7 +19,7 @@ Good question! I never asked them. If they want this removed, i will remove it.
 Since I have only tested this on a few Machines, i cannot guarantee that it will run on some specific configurations.
 
 ## How do i run this on linux?
-Read the Requirements above, downlaod this repo, extract it to a new folder, then from a terminal: "chmod +x launch.sh" (without quotation marks) and then run launch.sh
+Read the Requirements above, download this repo, extract it to a new folder, then from a terminal: "chmod +x launch.sh" (without quotation marks) and then run launch.sh
 
 
 
