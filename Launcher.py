@@ -51,8 +51,8 @@ processing = False
 only_update = False
 new_install = True
 updatefiles = 0
-sys.stdout = open(os.devnull, "w")
-sys.stderr = open(os.devnull, "w")
+#sys.stdout = open(os.devnull, "w")
+#sys.stderr = open(os.devnull, "w")
 gamemode = False
 
 class downloadNewThread(QThread):
@@ -339,9 +339,11 @@ class Launcher(QWidget):
         if state == QtCore.Qt.Checked:
             print('Checked')
             gamemode = True
+            with open('sys/gm', 'w'): pass
         else:
             print('Unchecked')
             gamemode = False
+            os.remove('sys/gm')
     def setup(self):
 
         vbox = QVBoxLayout(self)
@@ -399,6 +401,10 @@ class Launcher(QWidget):
         self.chbox = QCheckBox("With Gamemode (on Linux)",self)
         self.chbox.resize(160,30)
         self.chbox.stateChanged.connect(self.clickChBox)
+        if os.path.exists("sys/gm"):
+            self.chbox.setChecked(True)
+        else:
+            pass
         
         vbox.addWidget(self.label_curr)
         vbox.addWidget(self.progressfile)
