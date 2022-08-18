@@ -25,6 +25,6 @@ Read the Requirements above, download this repo, extract it to a new folder, the
 
 
 # Updates
-August 2022: Added an option to run with gamemode (if installed)
+Added an option to run with gamemode (if installed)
 
 Added an option to run with mangohud (if installed); Fixed broken checkbox detection
