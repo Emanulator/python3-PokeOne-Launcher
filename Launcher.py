@@ -17,16 +17,7 @@ from zipfile import ZipFile
 import pkg_resources
 
 
-import_list = {"requests","wget","PyQt5","tqdm"}
-if os.path.exists("sys/pyinstalled") == False:
-	for module in import_list:
-		try:
-			subprocess.check_call([sys.executable, "-m", "pip", "install", module])
-			with open("sys/pyinstalled", mode='a'): pass
-		except:
-			pass
-else:
-	pass
+
 
 import requests
 import wget
@@ -46,15 +37,16 @@ from PyQt5.QtWidgets import (
 from tqdm.auto import tqdm
 import shlex
 
-defpath = os.getcwd()
+#sys.stdout = open(os.devnull, "w")
+#sys.stderr = open(os.devnull, "w")
+
 processing = False
 only_update = False
 new_install = True
 updatefiles = 0
-#sys.stdout = open(os.devnull, "w")
-#sys.stderr = open(os.devnull, "w")
-gamemode = False
-mango = False
+
+install_directory = os.path.expanduser( '~' ) + "/PokeOne/"
+print(install_directory)
 
 class downloadNewThread(QThread):
 	data_downloaded = Signal(object)
@@ -64,40 +56,40 @@ class downloadNewThread(QThread):
 	def __init__(self):
 		QThread.__init__(self)
 
-	def __del__(self):
-		try:
-			subprocess.Popen("gamedata/PokeOne.exe")
-		except Exception as e:
-			print(e)
-
-		pass
+	#def __del__(self):
+	#	try:
+	#		subprocess.Popen("gamedata/PokeOne.exe")
+	#	except Exception as e:
+	#		print(e)
+#
+#		pass
 
 	def run(self):
 		try:
 			try:
-				os.remove("sys/update")
+				os.remove(install_directory + "sys/update")
 			except:
 				pass
-			with open("sys/defaultfiles") as f1:
+			with open(install_directory + "sys/defaultfiles") as f1:
 				f1_text = f1.readlines()
-			with open("sys/files") as f2:
+			with open(install_directory + "sys/files") as f2:
 				f2_text = f2.readlines()
-			update_file = open("sys/update", "w")
+			update_file = open(install_directory + "sys/update", "w")
 			f2.close()
 
 			# Find and print the diff:
 			for line in difflib.unified_diff(f1_text, f2_text):
 				if line[0] == "+" and line[1] != "+":
-					print(line)
+					#print(line)
 					n = update_file.write(line)
 			update_file.close()
 		except:
 			e = sys.exc_info()[0]
-			msg = QMessageBox()
-			msg.setText(str(e))
-			msg.exec_()
+			#msg = QMessageBox()
+			#msg.setText(str(e))
+			print(e)
 		filearray = []
-		f = open("sys/update")
+		f = open(install_directory + "sys/update")
 		line = f.readline()
 		while line:
 			linePart = line.partition(">")[0].replace("\\", "/").replace("+", "")
@@ -105,12 +97,12 @@ class downloadNewThread(QThread):
 			filearray.append(linePart)
 			line = f.readline()
 		for item in filearray:
-			print(filearray.index(item))
+			#print(filearray.index(item))
 			self.current_link.emit(item)
 			download(item, self.perc_downloaded)
 			self.data_downloaded.emit(filearray.index(item) * 73 / 100)
 		filesurl = "http://update.poke.one/files"
-		urllib.request.urlretrieve(filesurl, "sys/defaultfiles")
+		urllib.request.urlretrieve(filesurl,install_directory +  "sys/defaultfiles")
 		self.isFinished = True
 
 
@@ -131,12 +123,12 @@ class downloadThread(QThread):
 		filearray = []
 		filesurl = "http://update.poke.one/files"
 		try:
-			os.remove("sys/files")
+			os.remove(install_directory + "sys/files")
 		except Exception as e:
 			print(e)
 		if error == False:
-			urllib.request.urlretrieve(filesurl, "sys/files")
-			f = open("sys/files")
+			urllib.request.urlretrieve(filesurl, install_directory + "sys/files")
+			f = open(install_directory + "sys/files")
 			line = f.readline()
 			while line:
 				linePart = line.partition(">")[0].replace("\\", "/")
@@ -144,15 +136,15 @@ class downloadThread(QThread):
 				filearray.append(linePart)
 				line = f.readline()
 			for item in filearray:
-				print(filearray.index(item))
+				#print(filearray.index(item))
 				self.current_link.emit(item)
 				download(item, self.perc_downloaded)
 				self.data_downloaded.emit(filearray.index(item))
 			try:
-				os.remove("sys/defaultfiles")
+				os.remove(install_directory + "sys/defaultfiles")
 			except:
 				pass
-			shutil.copyfile("sys/files", "sys/defaultfiles")
+			shutil.copyfile(install_directory + "sys/files",install_directory +  "sys/defaultfiles")
 		error = False
 		self.isFinished = True
 
@@ -168,33 +160,29 @@ class extractThread(QThread):
 	def run(self):
 		error = False
 		rootpath = pathlib.Path().absolute()
-		print(rootpath)
+		#print(rootpath)
 		global currentfile
 		count = 0
 		# error check
 		try:
-			with open("sys/files", "r") as f:
+			with open(install_directory + "sys/files", "r") as f:
 				pass
 		except Exception as e:
 			print(e)
-			try:
-				subprocess.Popen("gamedata/PokeOne.exe")
-			except Exception as e:
-				print(e)
-				error = True
+			
 		if error == False:
 			if only_update == False:
-				with open("sys/files", "r") as f:
+				with open(install_directory + "sys/files", "r") as f:
 					for line in f:
 						count += 1
 			else:
-				with open("sys/update", "r") as f:
+				with open(install_directory + "sys/update", "r") as f:
 					for line in f:
 						count += 1
 			try:
-				print(currentfile)
+				#print(currentfile)
 				try:
-					for root, dirs, files in os.walk(rootpath):
+					for root, dirs, files in os.walk(install_directory):
 						for name in files:
 							if name.endswith((".zip", ".ZIP")):
 								print(
@@ -202,10 +190,10 @@ class extractThread(QThread):
 									+ str(os.path.join(root, name))
 								)
 								path = pathlib.Path(os.path.join(root, name))
-								print(path.parent)
+								#print(path.parent)
 								os.chdir(path.parent)
 								file_name = name  # get full path of files
-								print(file_name)
+								#print(file_name)
 								try:
 									zip_ref = zipfile.ZipFile(
 										path
@@ -217,10 +205,10 @@ class extractThread(QThread):
 									# window['progress'].update_bar(currentfile / count * 100)
 								except Exception as e:
 									print(e)
-					os.chdir(rootpath)
+					os.chdir(install_directory)
 				except Exception as e:
 					print(e)
-					os.chdir(rootpath)
+					os.chdir(install_directory)
 			except:
 				pass
 		error = False
@@ -235,37 +223,30 @@ class Launcher(QWidget):
 		# self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
 		# self.oldPos = self.pos()
 		self.show()
-		if path.exists("sys/installed"):
+		if path.exists(install_directory + "sys/installed"):
 			print("not a new install")
 			new_install = False
 		else:
 			print("is a new install")
 			new_install = True
-			msg_u = QMessageBox()
-			msg_u.setWindowTitle("Warning!")
-			msg_u.setText(
-				"This is not official Software. It might not work as excpected!"
-			)
-			msg_u.exec()
 
-		open("sys/installed", "a").close()
+		open(install_directory + "sys/installed", "a").close()
 		if new_install == True:
 			self.goself()
 		else:
 			self.checknew()
-		gamemode = False
-		mango = False
+
 	def import_all(self):
 		pass
 
 	def goself(self):
 		try:
-			os.remove("sys/files")
+			os.remove(install_directory + "sys/files")
 		except:
 			pass
 		self.btn_go.setEnabled(False)
 		#self.btn_r.setEnabled(False)
-		self.btn_c.setEnabled(False)
+		#self.btn_c.setEnabled(False)
 		self.btn_launch.setEnabled(False)
 		self.threads = []
 		downloader = downloadThread()
@@ -279,7 +260,7 @@ class Launcher(QWidget):
 	def checknew(self):
 		self.btn_go.setEnabled(False)
 		#self.btn_r.setEnabled(False)
-		self.btn_c.setEnabled(False)
+		#self.btn_c.setEnabled(False)
 		self.btn_launch.setEnabled(False)
 		self.threads = []
 		downloader1 = downloadNewThread()
@@ -301,7 +282,7 @@ class Launcher(QWidget):
 	def on_finished_ex(self):
 		self.btn_go.setEnabled(True)
 		# self.btn_x.setEnabled(True)
-		self.btn_c.setEnabled(True)
+		#self.btn_c.setEnabled(True)
 		#self.btn_r.setEnabled(True)
 		self.btn_launch.setEnabled(True)
 		self.progressfile.setValue(100)
@@ -309,11 +290,11 @@ class Launcher(QWidget):
 		self.label_curr.setText("Finished!")
 
 	def on_data_ready(self, data):
-		print(data)
+		#print(data)
 		self.progressall.setValue(data)
 
 	def updateperc(self, data):
-		print(data)
+		#print(data)
 		self.progressfile.setValue(data)
 
 	def updateLabel(self, data):
@@ -322,84 +303,19 @@ class Launcher(QWidget):
 	def launchGame(self):
 		if os.name == 'nt':
 			try:
-				subprocess.Popen("gamedata/PokeOne.exe")
+				subprocess.Popen(install_directory + "gamedata/PokeOne.exe")
 			except Exception as e:
 				print(e)
-		try:
-			#if os.path.exists("sys/mango"):
-			#	mango = True
-			#if os.path.exists("sys/gm"):
-			#	gamemode = True
-			#print(gamemode)
-			#print(mango)
-			if os.path.exists("sys/gm") == True and os.path.exists("sys/mango") == False:
-				subprocess.Popen("DXVK_ASYNC=1 gamemoderun wine gamedata/PokeOne.exe", shell=True)
-			elif os.path.exists("sys/gm") == True and os.path.exists("sys/mango") == True:
-				subprocess.Popen("DXVK_ASYNC=1 MANGOHUD=1 mangohud gamemoderun wine gamedata/PokeOne.exe", shell=True)
-			elif os.path.exists("sys/gm") == False and os.path.exists("sys/mango") == True:
-				subprocess.Popen("DXVK_ASYNC=1 MANGOHUD=1 mangohud wine gamedata/PokeOne.exe", shell=True)
-			else:
-				subprocess.Popen("DXVK_ASYNC=1 wine gamedata/PokeOne.exe", shell=True)
-
-		except Exception as e:
-			print(e)
-
-	def changelogEvent(self):
-		msg = QMessageBox()
-		msg.setWindowTitle("Launcher Changelog")
-		msg.setText("")
-		msg.exec()
-
-	def reloadEvent(self):
-		cmd = "python " + defpath + "/main-simple.py"
-		cmds = shlex.split(cmd)
-		p = subprocess.Popen(cmds, start_new_session=True)
-		sys.exit()
-	def clickChBox(self, state):
-
-		if state == QtCore.Qt.Checked:
-			print('Checked')
-			#gamemode = True
-			with open('sys/gm', 'w'): pass
 		else:
-			print('Unchecked')
-			#gamemode = False
-			os.remove('sys/gm')
-	def clickMangoChBox(self, state):
+			try:
+				subprocess.Popen("DXVK_ASYNC=1 wine " + install_directory + "gamedata/PokeOne.exe", shell=True)
 
-		if state == QtCore.Qt.Checked:
-			print('Checked')
-			#mango = True
-			with open('sys/mango', 'w'): pass
-		else:
-			print('Unchecked')
-			#mango = False
-			os.remove('sys/mango')
+			except Exception as e:
+				print(e)
+
 	def setup(self):
 
 		vbox = QVBoxLayout(self)
-		# self.webEngineView = QWebEngineView()
-		# self.loadPage()
-		# self.btn_x = QPushButton('X', self)
-		# self.btn_x.resize(40,30)
-		# self.btn_x.move(700-42,0+2)
-		# self.btn_x.clicked.connect(self.closeEvent)
-
-		self.btn_c = QPushButton("Changelog", self)
-		#self.btn_c.resize(200, 30)
-		self.btn_c.resize(0, 0)
-		# self.btn_c.move(700-264,0+2)
-		self.btn_c.clicked.connect(self.changelogEvent)
-
-		#self.btn_r = QPushButton("Reload", self)
-		#self.btn_r.resize(150, 30)
-		#self.btn_r.move(700 - 264 - 250, 0)
-		#self.btn_r.clicked.connect(self.reloadEvent)
-
-		#self.labelupd = QLabel("<-- Click to recheck for updates", self)
-		#self.labelupd.resize(250, 30)
-		#self.labelupd.move(700 - 264 - 100, 0)
-
 		self.btn_go = QPushButton("Full Download", self)
 		self.btn_go.clicked.connect(self.goself)
 		self.btn_go.resize(80, 20)
@@ -418,46 +334,14 @@ class Launcher(QWidget):
 		self.progressall.setMaximum(73)
 		self.Spacer = QtWidgets.QSpacerItem(20, 20)
 
-		# add labels to vbox after here
 		vbox.addItem(self.Spacer)
-		# vbox.addWidget(label_title)
 
-		# vbox.addWidget(self.webEngineView)
-
-		# vbox.addItem(self.Spacer)
-		# vbox.addItem(self.Spacer)
-		# vbox.addItem(self.Spacer)
-		# vbox.addItem(self.Spacer)
-		# vbox.addItem(self.Spacer)
-		self.chbox = QCheckBox("With Gamemode (on Linux)",self)
-		self.chbox.resize(160,30)
-		self.chbox.stateChanged.connect(self.clickChBox)
-		if os.path.exists("sys/gm"):
-			self.chbox.setChecked(True)
-			#gamemode = True
-		else:
-			pass
-		
-		self.mangochbox = QCheckBox("With Mangohud (on Linux)",self)
-		self.mangochbox.resize(160,30)
-		self.mangochbox.stateChanged.connect(self.clickMangoChBox)
-		if os.path.exists("sys/mango"):
-			self.mangochbox.setChecked(True)
-			#mango = True
-		else:
-			pass
-		
 		vbox.addWidget(self.label_curr)
 		vbox.addWidget(self.progressfile)
 		vbox.addWidget(self.label_progress)
 		vbox.addWidget(self.progressall)
 		vbox.addWidget(self.btn_go)
 		vbox.addWidget(self.btn_launch)
-		if os.name == 'nt':
-			self.chbox.hide()
-			self.mangochbox.hide()
-		vbox.addWidget(self.chbox)
-		vbox.addWidget(self.mangochbox)
 		self.setLayout(vbox)
 		self.setGeometry(100, 100, 200, 150)
 		self.setFixedSize(700, 220)
@@ -511,8 +395,8 @@ def parseUpdate(self, only_update=False, update_file=""):
 	if only_update == False:
 
 		filesurl = "http://update.poke.one/files"
-		urllib.request.urlretrieve(filesurl, "sys/files")
-		f = open("files")
+		urllib.request.urlretrieve(filesurl,install_directory + "sys/files")
+		f = open(install_directory + "sys/files")
 		line = f.readline()
 		while line:
 			linePart = line.partition(">")[0].replace("\\", "/")
@@ -532,8 +416,8 @@ def parseUpdate(self, only_update=False, update_file=""):
 		f.close()
 	else:
 		filesurl = "http://update.poke.one/files"
-		urllib.request.urlretrieve(filesurl, "files")
-		f = open("update")
+		urllib.request.urlretrieve(filesurl,install_directory + "sys/files")
+		f = open(install_directory + "sys/update")
 		line = f.readline()
 		while line:
 			linePart = line.partition(">")[0].replace("\\", "/").replace("+", "")
@@ -546,33 +430,7 @@ def parseUpdate(self, only_update=False, update_file=""):
 		f.close()
 
 
-def update_thread(
-	self,
-	only_update=False,
-):
-	if only_update == False:
-		runUpdate(self)
-		result_available.wait()
-		extractFile(self, only_update=False)
-	else:
-		runUpdate(self, only_update=True)
-		result_available.wait()
-		extractFile(self, only_update=True)
-		try:
-			os.remove("sys/defaultfiles")
-		except:
-			pass
-		try:
-			shutil.copy("sys/files", "sys/defaultfiles")
-		except:
-			with open("sys/files") as fg:
-				with open("sys/files") as fg2:
-					fg.write(fg2.read())
-			fg.close()
-			shutil.copy("sys/files", "sys/defaultfiles")
-	# window["status"].update("Finished!")
-	# window['progress'].update_bar(100)
-	updating = False
+
 
 
 def download(file, percobj):
@@ -581,8 +439,8 @@ def download(file, percobj):
 		req = urllib.request.Request(downloadString, method="HEAD")
 		r = urllib.request.urlopen(req)
 		outputfile = downloadString.replace("http://update.poke.one/request/", "")
-		outputfile = "gamedata/" + outputfile + ".zip"
-		print(outputfile)
+		outputfile = install_directory + "gamedata/" + outputfile + ".zip"
+		#print(outputfile)
 		# num_lines = sum(1 for line in open('files'))
 		global currentfile
 		currentfile = 0
@@ -605,9 +463,9 @@ def download(file, percobj):
 		# window['progress'].update_bar(currentfile / count * 100)
 	except:
 		e = sys.exc_info()[0]
-		msg = QMessageBox()
-		msg.setText(str(e))
-		msg.exec_()
+		#msg = QMessageBox()
+		#msg.setText(str(e))
+		print(e)
 
 
 def checkupdates():
@@ -616,14 +474,14 @@ def checkupdates():
 	print("running check")
 	try:
 		try:
-			os.remove("sys/update")
+			os.remove(install_directory + "sys/update")
 		except:
 			pass
-		with open("sys/defaultfiles") as f1:
+		with open(install_directory + "sys/defaultfiles") as f1:
 			f1_text = f1.readlines()
-		with open("sys/files") as f2:
+		with open(install_directory + "sys/files") as f2:
 			f2_text = f2.readlines()
-		update_file = open("sys/update", "w")
+		update_file = open(install_directory + "sys/update", "w")
 		f2.close()
 
 		# Find and print the diff:
@@ -644,33 +502,34 @@ def checkupdates():
 
 def createFiles():
 	try:
-		if path.exists("gamedata/") == False:
-			os.mkdir("gamedata/")
-		os.makedirs("gamedata/PokeOne_Data/StreamingAssets/", exist_ok=True)
-		os.makedirs("gamedata/PokeOne_Data/Resources/", exist_ok=True)
-		os.makedirs("gamedata/PokeOne_Data/Plugins/", exist_ok=True)
-		os.makedirs("gamedata/PokeOne_Data/il2cpp_data/Resources/", exist_ok=True)
-		os.makedirs("gamedata/PokeOne_Data/il2cpp_data/Metadata/", exist_ok=True)
+		os.makedirs(install_directory)
+		if path.exists(install_directory + "gamedata/") == False:
+			os.mkdir(install_directory + "gamedata/")
+		os.makedirs(install_directory + "gamedata/PokeOne_Data/StreamingAssets/", exist_ok=True)
+		os.makedirs(install_directory + "gamedata/PokeOne_Data/Resources/", exist_ok=True)
+		os.makedirs(install_directory + "gamedata/PokeOne_Data/Plugins/", exist_ok=True)
+		os.makedirs(install_directory + "gamedata/PokeOne_Data/il2cpp_data/Resources/", exist_ok=True)
+		os.makedirs(install_directory + "gamedata/PokeOne_Data/il2cpp_data/Metadata/", exist_ok=True)
 		os.makedirs(
-			"gamedata/PokeOne_Data/il2cpp_data/etc/mono/mconfig/", exist_ok=True
+			install_directory + "gamedata/PokeOne_Data/il2cpp_data/etc/mono/mconfig/", exist_ok=True
 		)
 		os.makedirs(
-			"gamedata/PokeOne_Data/il2cpp_data/etc/mono/4.5/Browsers/", exist_ok=True
+			install_directory + "gamedata/PokeOne_Data/il2cpp_data/etc/mono/4.5/Browsers/", exist_ok=True
 		)
 		os.makedirs(
-			"gamedata/PokeOne_Data/il2cpp_data/etc/mono/4.0/Browsers/", exist_ok=True
+			install_directory + "gamedata/PokeOne_Data/il2cpp_data/etc/mono/4.0/Browsers/", exist_ok=True
 		)
 		os.makedirs(
-			"gamedata/PokeOne_Data/il2cpp_data/etc/mono/2.0/Browsers/", exist_ok=True
+			install_directory + "gamedata/PokeOne_Data/il2cpp_data/etc/mono/2.0/Browsers/", exist_ok=True
 		)
 
-		if path.exists("sys/") == False:
-			os.mkdir("sys/")
+		if path.exists(install_directory + "sys/") == False:
+			os.mkdir(install_directory + "sys/")
 
-		if path.exists("sys/defaultfiles") == False:
-			wget.download("http://update.poke.one/files", out="sys/defaultfiles")
-		if path.exists("sys/files") == False:
-			wget.download("http://update.poke.one/files", out="sys/files")
+		if path.exists(install_directory + "sys/defaultfiles") == False:
+			wget.download("http://update.poke.one/files", out=install_directory + "sys/defaultfiles")
+		if path.exists(install_directory + "sys/files") == False:
+			wget.download("http://update.poke.one/files", out=install_directory + "sys/files")
 
 	except:
 		pass
