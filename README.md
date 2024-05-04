@@ -1,17 +1,20 @@
 # PokeOne Launcher for Linux
 
 
-**I hope, you have at least basic knowledge of linux, because this Launcher is only for downloading the game files.**
-
-**Getting the Game itself to work is not my part.**
-
-
+## Requirements
+- You have basic knowledge of linux
+- You know how to install packages
 
 
-## How to:
+
+
+## How to (Standalone):
 - Check that your linux distro supports AppImages and has WINE installed
 - Download the Appimage from the Releases tab
 - Run the Appimage
+
+## How to (SteamDeck):
+- To be Edited
 
 ##
 More info about the Game:
