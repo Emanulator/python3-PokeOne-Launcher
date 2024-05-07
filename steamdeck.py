@@ -21,10 +21,10 @@ import pkg_resources
 
 import requests
 import wget
-from PyQt6 import QtWidgets,QtCore
-from PyQt6.QtCore import QThread
-from PyQt6.QtCore import Signal as Signal
-from PyQt6.QtWidgets import (
+from PyQt5 import QtWidgets,QtCore
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import pyqtsignal as Signal
+from PyQt5.QtWidgets import (
 	QApplication,
 	QPushButton,
 	QWidget,
