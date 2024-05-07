@@ -13,6 +13,9 @@
 - Download the Appimage from the Releases tab
 - Run the Appimage
 
+![image](https://github.com/Emanulator/python3-PokeOne-Launcher/assets/14092505/023c6528-c25f-4eed-8f01-94e332cc93f6)
+
+
 ## How to (SteamDeck):
 - Download the "install-p1-steamdeck.sh" file
 - run it in terminal
