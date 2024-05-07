@@ -13,7 +13,7 @@ flatpak run --command=bottles-cli com.usebottles.bottles new --bottle-name P1 --
 flatpak override --user com.usebottles.bottles --filesystem="~/PokeOne"
 git clone https://github.com/sonic2kk/steamtinkerlaunch ~/steamtinkerlaunch
 chmod +x ~/steamtinkerlaunch/steamtinkerlaunch
-wget https://github.com/emanuel2001just/python3-PokeOne-Launcher/releases/download/steamdeck-test1/PokeOne.Launcher.SteamDeck.AppImage -O ~/PokeOne.AppImage
+wget https://github.com/Emanulator/python3-PokeOne-Launcher/releases/download/steamdeck-test1/PokeOne.Launcher.SteamDeck.AppImage -O ~/PokeOne.AppImage
 
 chmod +x ~/PokeOne.AppImage
 unset HOME; export HOME=~
