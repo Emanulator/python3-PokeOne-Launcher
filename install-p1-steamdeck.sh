@@ -1,4 +1,6 @@
-flatpak --user --assumeyes --noninteractive install flathub com.usebottles.bottles
+#flatpak --user --assumeyes --noninteractive install flathub com.usebottles.bottles
+flatpak --assumeyes install flathub com.usebottles.bottles
+
 flatpak run --command=bottles-cli com.usebottles.bottles new --bottle-name P1 --environment gaming
 
 git clone https://github.com/sonic2kk/steamtinkerlaunch ~/steamtinkerlaunch
