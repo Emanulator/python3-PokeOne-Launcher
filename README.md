@@ -14,7 +14,10 @@
 - Run the Appimage
 
 ## How to (SteamDeck):
-- To be Edited
+- Download the "install-p1-steamdeck.sh" file
+- run it in terminal
+- follow the instructions
+- Go back to Gamemode and PokeOne should be listed there
 
 ##
 More info about the Game:
