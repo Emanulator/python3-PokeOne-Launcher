@@ -1,6 +1,3 @@
-# DOES NOT WORK CORRECTLY CURRENTLY
-## Working on a fix..
-
 # PokeOne Launcher for Linux
 
 
